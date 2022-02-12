@@ -11,21 +11,37 @@ using System.Collections.Generic;
 
 public static class Extensions {
 	#region Join 将所有元素挨个拼接成字符串
-	public static string Join(this IEnumerable array, string separator = ", ") {
-		int count = 0;
-		foreach (var _ in array) {
-			++count;
-		}
-		StringBuilder sb = new StringBuilder();
-		int index = 0;
-		foreach (var element in array) {
-			sb.Append(element ?? "Null");
-			++index;
-			if (index < count && separator != null) {
-				sb.Append(separator);
+	public static string Join(this Array array, string separator = ", ") {
+		int length = array.Length;
+		if (length > 0) {
+			StringBuilder sb = new StringBuilder();
+			int index = 0;
+			foreach (var element in array) {
+				sb.Append(element ?? "Empty");
+				++index;
+				if (index < length && separator != null) {
+					sb.Append(separator);
+				}
 			}
+			return sb.ToString();
 		}
-		return sb.ToString();
+		return "";
+	}
+	public static string Join(this ICollection collection, string separator = ", ") {
+		int count = collection.Count;
+		if (count > 0) {
+			StringBuilder sb = new StringBuilder();
+			int index = 0;
+			foreach (var element in collection) {
+				sb.Append(element ?? "Empty");
+				++index;
+				if (index < count && separator != null) {
+					sb.Append(separator);
+				}
+			}
+			return sb.ToString();
+		}
+		return "";
 	}
 	#endregion
 
