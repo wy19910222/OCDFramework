@@ -34,9 +34,9 @@ public class AsyncTask<T> {
 	public T Result { get; private set; }
 	public object Reason { get; private set; }
 
-	private List<Action<T>> mThenCalls = new List<Action<T>>();
-	private List<Action<object>> mCatchCalls = new List<Action<object>>();
-	private List<Action<T, object>> mFinallyCalls = new List<Action<T, object>>();
+	private List<Action<T>> m_thenCalls = new List<Action<T>>();
+	private List<Action<object>> m_catchCalls = new List<Action<object>>();
+	private List<Action<T, object>> m_finallyCalls = new List<Action<T, object>>();
 
 	public AsyncTask([NotNull]Action<Action<T>, Action<object>> executor, object tag = null) {
 		Tag = tag;
@@ -60,20 +60,20 @@ public class AsyncTask<T> {
 		IsDone = true;
 		IsSucceed = isSucceed;
 		if (isSucceed) {
-			foreach (var thenCall in mThenCalls) {
+			foreach (var thenCall in m_thenCalls) {
 				try { thenCall(Result); } catch (Exception e) { Debug.LogError(e); }
 			}
 		} else {
-			foreach (var catchCall in mCatchCalls) {
+			foreach (var catchCall in m_catchCalls) {
 				try { catchCall(Reason); } catch (Exception e) { Debug.LogError(e); }
 			}
 		}
-		foreach (var finallyCall in mFinallyCalls) {
+		foreach (var finallyCall in m_finallyCalls) {
 			try { finallyCall(Result, Reason); } catch (Exception e) { Debug.LogError(e); }
 		}
-		mThenCalls = null;
-		mCatchCalls = null;
-		mFinallyCalls = null;
+		m_thenCalls = null;
+		m_catchCalls = null;
+		m_finallyCalls = null;
 	}
 
 	public void Cancel() {
@@ -86,7 +86,7 @@ public class AsyncTask<T> {
 	public void Then(Action<T> thenCall) {
 		if (thenCall != null) {
 			if (!IsDone) {
-				mThenCalls.Add(thenCall);
+				m_thenCalls.Add(thenCall);
 			} else if (IsSucceed) {
 				try { thenCall(Result); } catch (Exception e) { Debug.LogError(e); }
 			}
@@ -96,7 +96,7 @@ public class AsyncTask<T> {
 	public void Catch(Action<object> catchCall) {
 		if (catchCall != null) {
 			if (!IsDone) {
-				mCatchCalls.Add(catchCall);
+				m_catchCalls.Add(catchCall);
 			} else if (!IsSucceed) {
 				try { catchCall(Reason); } catch (Exception e) { Debug.LogError(e); }
 			}
@@ -106,7 +106,7 @@ public class AsyncTask<T> {
 	public void Finally(Action<T, object> finallyCall) {
 		if (finallyCall != null) {
 			if (!IsDone) {
-				mFinallyCalls.Add(finallyCall);
+				m_finallyCalls.Add(finallyCall);
 			} else {
 				try { finallyCall(Result, Reason); } catch (Exception e) { Debug.LogError(e); }
 			}
