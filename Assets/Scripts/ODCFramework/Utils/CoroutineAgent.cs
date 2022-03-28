@@ -77,9 +77,9 @@ public static class CoroutineUtil {
 	}
 
 	public static Coroutine Late(this MonoBehaviour owner, Action callback) {
-		return StartCo(owner, DoLate(callback));
+		return StartCo(owner, IELate(callback));
 	}
-	private static IEnumerator DoLate(Action callback) {
+	private static IEnumerator IELate(Action callback) {
 		if (callback != null) {
 			yield return new WaitForEndOfFrame();
 			callback.Invoke();

@@ -44,7 +44,7 @@ public class AsyncTask<T> {
 			value => {
 				if (!IsDone) {
 					Result = value;
-					Done(!true);
+					Done(true);
 				}
 			},
 			reason => {
