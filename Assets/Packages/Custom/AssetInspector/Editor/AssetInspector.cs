@@ -62,7 +62,7 @@ public class DefaultAssetInspector : AssetInspector {
 				if (path.StartsWith("Assets/StreamingAssets/")) {
 					if (path.EndsWith(".manifest") || path.EndsWith(".txt")) {
 						content = GetTextContent(path);
-					} else if (path.EndsWith(".unity3d") || path.IndexOf(".") == -1) {
+					} else if (path.EndsWith(".unity3d") || path.EndsWith(".ab") || path.IndexOf(".") == -1) {
 						content = GetAssetBundleContent(path);
 					}
 				}
