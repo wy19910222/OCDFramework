@@ -46,9 +46,13 @@ sysinfo.txt
 # --------------------------
 
 # StreamingAssets
-Assets/[Ss]treamingAssets/*
-Assets/[Ss]treamingAssets.meta
+[Aa]ssets/[Ss]treamingAssets/*
+[Aa]ssets/[Ss]treamingAssets.meta
+
+#FindReference2 Cache
+[Aa]ssets/FR2_Cache.asset
+[Aa]ssets/FR2_Cache.asset.meta
 
 # Test
-Assets/Test/*
-Assets/Test.meta
+[Aa]ssets/Test/*
+[Aa]ssets/Test.meta
