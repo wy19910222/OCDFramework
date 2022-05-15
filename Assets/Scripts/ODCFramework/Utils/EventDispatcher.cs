@@ -293,7 +293,7 @@ public static class EventDispatcher {
 				return false;
 			}
 
-			if (callback != null && callback != _listener.EventHandler) {
+			if (callback != null && !Equals(callback, _listener.EventHandler)) {
 				return false;
 			}
 
@@ -406,7 +406,8 @@ public static class EventDispatcher {
 
 		// 遍历列表，查找监听
 		foreach (EventListener listener in listeners) {
-			if (listener.EventHandler == callback) {
+			
+			if (Equals(listener.EventHandler, callback)) {
 				return listener;
 			}
 		}
