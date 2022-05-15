@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Layout3D {
-	public class GridLayout : MonoBehaviour {
+	public class Grid3DLayout : MonoBehaviour {
 		public Direction direction0 = Direction.X;
 		public SortType direction0Sort = SortType.POSITIVE;
 		public AlignType direction0Align = AlignType.POSITIVE;

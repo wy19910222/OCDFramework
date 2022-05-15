@@ -15,24 +15,24 @@ using UObject = UnityEngine.Object;
 namespace Layout3D {
 
 	[CanEditMultipleObjects]
-	[CustomEditor(typeof(GridLayout), true)]
-	public class GridLayout1Inspector : Editor {
+	[CustomEditor(typeof(Grid3DLayout), true)]
+	public class Grid3DLayoutInspector : Editor {
 
-		protected GridLayout m_gridLayout;
+		protected Grid3DLayout grid3DLayout;
 
 		public void OnEnable() {
-			m_gridLayout = target as GridLayout;
+			grid3DLayout = target as Grid3DLayout;
 		}
 
 		public override void OnInspectorGUI() {
 			DrawDirection(0);
 			DrawSortAndAlign(0);
 			DrawDeltaAndLimit(0);
-			if (m_gridLayout.direction0Limit > 0) {
+			if (grid3DLayout.direction0Limit > 0) {
 				DrawDirection(1);
 				DrawSortAndAlign(1);
 				DrawDeltaAndLimit(1);
-				if (m_gridLayout.direction1Limit > 0) {
+				if (grid3DLayout.direction1Limit > 0) {
 					DrawDirection(2);
 					DrawSortAndAlign(2);
 					DrawDeltaAndLimit(2);
@@ -44,30 +44,30 @@ namespace Layout3D {
 			{
 				GUILayout.Label("Range:", "BoldLabel", GUILayout.Width(42F));
 				GUILayout.Label(new GUIContent("Start:", "Include"), GUILayout.Width(34F));
-				int newStart = Mathf.Max(EditorGUILayout.IntField(m_gridLayout.range.x), 0);
-				if (newStart != m_gridLayout.range.x) {
-					Undo.RecordObject(m_gridLayout, "Range");
-					m_gridLayout.range.x = newStart;
+				int newStart = Mathf.Max(EditorGUILayout.IntField(grid3DLayout.range.x), 0);
+				if (newStart != grid3DLayout.range.x) {
+					Undo.RecordObject(grid3DLayout, "Range");
+					grid3DLayout.range.x = newStart;
 				}
 				GUILayout.Label(new GUIContent("Length:", "Exclude"), GUILayout.Width(46F));
-				int oldEnd = m_gridLayout.range.y;
+				int oldEnd = grid3DLayout.range.y;
 				if (oldEnd < 0) {
 					float newEnd = EditorGUILayout.FloatField(Mathf.Infinity);
 					if (newEnd < 0) {
-						Undo.RecordObject(m_gridLayout, "Range");
-						m_gridLayout.range.y = -1;
-					} else if (newEnd != Mathf.Infinity) {
-						Undo.RecordObject(m_gridLayout, "Range");
-						m_gridLayout.range.y = (int)newEnd;
+						Undo.RecordObject(grid3DLayout, "Range");
+						grid3DLayout.range.y = -1;
+					} else if (!float.IsPositiveInfinity(newEnd)) {
+						Undo.RecordObject(grid3DLayout, "Range");
+						grid3DLayout.range.y = (int)newEnd;
 					}
 				} else {
 					int newEnd = EditorGUILayout.IntField(oldEnd);
 					if (newEnd < 0) {
-						Undo.RecordObject(m_gridLayout, "Range");
-						m_gridLayout.range.y = -1;
+						Undo.RecordObject(grid3DLayout, "Range");
+						grid3DLayout.range.y = -1;
 					} else if (newEnd != oldEnd) {
-						Undo.RecordObject(m_gridLayout, "Range");
-						m_gridLayout.range.y = newEnd;
+						Undo.RecordObject(grid3DLayout, "Range");
+						grid3DLayout.range.y = newEnd;
 					}
 				}
 			}
@@ -76,10 +76,10 @@ namespace Layout3D {
 			EditorGUILayout.BeginHorizontal();
 			{
 				GUILayout.Label("Offset:", "BoldLabel", GUILayout.Width(42F));
-				Vector3 newOffset = EditorGUILayout.Vector3Field("", m_gridLayout.offset);
-				if (newOffset != m_gridLayout.offset) {
-					Undo.RecordObject(m_gridLayout, "Offset");
-					m_gridLayout.offset = newOffset;
+				Vector3 newOffset = EditorGUILayout.Vector3Field("", grid3DLayout.offset);
+				if (newOffset != grid3DLayout.offset) {
+					Undo.RecordObject(grid3DLayout, "Offset");
+					grid3DLayout.offset = newOffset;
 				}
 			}
 			EditorGUILayout.EndHorizontal();
@@ -87,10 +87,10 @@ namespace Layout3D {
 			EditorGUILayout.BeginHorizontal();
 			{
 				GUILayout.Label("Ignore Inactive:", "BoldLabel", GUILayout.Width(90F));
-				bool newIgnoreInactive = EditorGUILayout.Toggle(m_gridLayout.ignoreInactive);
-				if (newIgnoreInactive != m_gridLayout.ignoreInactive) {
-					Undo.RecordObject(m_gridLayout, "IgnoreInactive");
-					m_gridLayout.ignoreInactive = newIgnoreInactive;
+				bool newIgnoreInactive = EditorGUILayout.Toggle(grid3DLayout.ignoreInactive);
+				if (newIgnoreInactive != grid3DLayout.ignoreInactive) {
+					Undo.RecordObject(grid3DLayout, "IgnoreInactive");
+					grid3DLayout.ignoreInactive = newIgnoreInactive;
 				}
 			}
 			EditorGUILayout.EndHorizontal();
@@ -98,7 +98,7 @@ namespace Layout3D {
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("skips"), true);
 
 			if (GUI.changed) {
-				EditorUtility.SetDirty(m_gridLayout);
+				EditorUtility.SetDirty(grid3DLayout);
 			}
 		}
 
@@ -107,40 +107,40 @@ namespace Layout3D {
 			{
 				if (i == 0) {
 					GUILayout.Label("Direction0:", "BoldLabel", GUILayout.Width(66F));
-					Direction oldDirection0 = m_gridLayout.direction0;
+					Direction oldDirection0 = grid3DLayout.direction0;
 					Direction newDirection0 = (Direction)EditorGUILayout.EnumPopup(oldDirection0);
 					if (newDirection0 != oldDirection0) {
-						Undo.RecordObject(m_gridLayout, "Direction");
-						m_gridLayout.direction0 = newDirection0;
-						if (newDirection0 == m_gridLayout.direction1) {
-							m_gridLayout.direction1 = oldDirection0;
-						} else if (newDirection0 == m_gridLayout.direction2) {
-							m_gridLayout.direction2 = oldDirection0;
+						Undo.RecordObject(grid3DLayout, "Direction");
+						grid3DLayout.direction0 = newDirection0;
+						if (newDirection0 == grid3DLayout.direction1) {
+							grid3DLayout.direction1 = oldDirection0;
+						} else if (newDirection0 == grid3DLayout.direction2) {
+							grid3DLayout.direction2 = oldDirection0;
 						}
 					}
 				} else if (i == 1) {
 					GUILayout.Label("Direction1:", "BoldLabel", GUILayout.Width(66F));
-					List<Direction> list = new List<Direction>(new Direction[] { Direction.X, Direction.Y, Direction.Z });
-					list.Remove(m_gridLayout.direction0);
+					List<Direction> list = new List<Direction>(new[] { Direction.X, Direction.Y, Direction.Z });
+					list.Remove(grid3DLayout.direction0);
 					string[] options = list.ConvertAll(dir => dir + "").ToArray();
 					int[] values = list.ConvertAll(dir => (int)dir).ToArray();
-					Direction oldDirection1 = m_gridLayout.direction1;
+					Direction oldDirection1 = grid3DLayout.direction1;
 					Direction newDirection1 = (Direction)EditorGUILayout.IntPopup((int)oldDirection1, options, values);
 					if (newDirection1 != oldDirection1) {
-						Undo.RecordObject(m_gridLayout, "Direction");
-						m_gridLayout.direction1 = newDirection1;
-						m_gridLayout.direction2 = oldDirection1;
+						Undo.RecordObject(grid3DLayout, "Direction");
+						grid3DLayout.direction1 = newDirection1;
+						grid3DLayout.direction2 = oldDirection1;
 					}
 				} else if (i == 2) {
 					GUILayout.Label("Direction2:", "BoldLabel", GUILayout.Width(66F));
-					string[] options = new string[] { m_gridLayout.direction2 + "" };
+					string[] options = new string[] { grid3DLayout.direction2 + "" };
 					EditorGUILayout.Popup(0, options);
 				}
 
 				// 上移下移删除按钮
-				Type type = m_gridLayout.GetType();
+				Type type = grid3DLayout.GetType();
 				FieldInfo limitField = type.GetField("direction" + i + "Limit", BindingFlags.Instance | BindingFlags.Public);
-				uint limit = limitField == null ? 0 : (uint)limitField.GetValue(m_gridLayout);
+				uint limit = limitField == null ? 0 : (uint)limitField.GetValue(grid3DLayout);
 				bool hasPrev = i > 0;
 				bool hasNext = limit > 0;
 				GUI.enabled = hasPrev;
@@ -165,8 +165,8 @@ namespace Layout3D {
 						swapSucceed = SwapValue(index, ++index);
 					}
 					FieldInfo prevLimitField = type.GetField("direction" + (index - 2) + "Limit", BindingFlags.Instance | BindingFlags.Public);
-					Undo.RecordObject(m_gridLayout, "Remove");
-					prevLimitField.SetValue(m_gridLayout, (uint)0);
+					Undo.RecordObject(grid3DLayout, "Remove");
+					prevLimitField?.SetValue(grid3DLayout, (uint)0);
 				}
 			}
 			EditorGUILayout.EndHorizontal();
@@ -177,24 +177,24 @@ namespace Layout3D {
 			{
 				GUILayout.Space(10F);
 
-				Type type = m_gridLayout.GetType();
+				Type type = grid3DLayout.GetType();
 
 				GUILayout.Label("Sort" + i + ":", GUILayout.Width(38F));
 				FieldInfo sortField = type.GetField("direction" + i + "Sort", BindingFlags.Instance | BindingFlags.Public);
-				SortType oldSort = (SortType)sortField.GetValue(m_gridLayout);
+				SortType oldSort = (SortType)sortField.GetValue(grid3DLayout);
 				SortType newSort = (SortType)EditorGUILayout.EnumPopup(oldSort);
 				if (newSort != oldSort) {
-					Undo.RecordObject(m_gridLayout, "Sort");
-					sortField.SetValue(m_gridLayout, newSort);
+					Undo.RecordObject(grid3DLayout, "Sort");
+					sortField.SetValue(grid3DLayout, newSort);
 				}
 
 				GUILayout.Label("Align" + i + ":", GUILayout.Width(42F));
 				FieldInfo alignField = type.GetField("direction" + i + "Align", BindingFlags.Instance | BindingFlags.Public);
-				AlignType oldAlign = (AlignType)alignField.GetValue(m_gridLayout);
+				AlignType oldAlign = (AlignType)alignField.GetValue(grid3DLayout);
 				AlignType newAlign = (AlignType)EditorGUILayout.EnumPopup(oldAlign);
 				if (newAlign != oldAlign) {
-					Undo.RecordObject(m_gridLayout, "Align");
-					alignField.SetValue(m_gridLayout, newAlign);
+					Undo.RecordObject(grid3DLayout, "Align");
+					alignField.SetValue(grid3DLayout, newAlign);
 				}
 			}
 			EditorGUILayout.EndHorizontal();
@@ -205,26 +205,26 @@ namespace Layout3D {
 			{
 				GUILayout.Space(10F);
 
-				Type type = m_gridLayout.GetType();
+				Type type = grid3DLayout.GetType();
 
 				GUILayout.Label("Delta" + i + ":", GUILayout.Width(44F));
 				FieldInfo deltaField = type.GetField("direction" + i + "Delta", BindingFlags.Instance | BindingFlags.Public);
-				float oldDelta = (float)deltaField.GetValue(m_gridLayout);
+				float oldDelta = (float)deltaField.GetValue(grid3DLayout);
 				float newDelta = EditorGUILayout.FloatField(oldDelta);
-				if (newDelta != oldDelta) {
-					Undo.RecordObject(m_gridLayout, "Delta");
-					deltaField.SetValue(m_gridLayout, newDelta);
+				if (Mathf.Abs(newDelta - oldDelta) > Mathf.Epsilon) {
+					Undo.RecordObject(grid3DLayout, "Delta");
+					deltaField.SetValue(grid3DLayout, newDelta);
 				}
 
 				GUILayout.Label("CountLimit" + i + ":", GUILayout.Width(76F));
 				FieldInfo limitField = type.GetField("direction" + i + "Limit", BindingFlags.Instance | BindingFlags.Public);
 				if (limitField != null) {
-					object limit = limitField.GetValue(m_gridLayout);
+					object limit = limitField.GetValue(grid3DLayout);
 					uint oldLimit = (uint)limit;
 					uint newLimit = (uint)Mathf.Max(EditorGUILayout.IntField((int)oldLimit), 0);
 					if (newLimit != oldLimit) {
-						Undo.RecordObject(m_gridLayout, "Limit");
-						limitField.SetValue(m_gridLayout, newLimit);
+						Undo.RecordObject(grid3DLayout, "Limit");
+						limitField.SetValue(grid3DLayout, newLimit);
 					}
 				} else {
 					GUI.enabled = false;
@@ -236,7 +236,7 @@ namespace Layout3D {
 		}
 
 		private bool SwapValue(int prevI, int nextI) {
-			Type type = m_gridLayout.GetType();
+			Type type = grid3DLayout.GetType();
 
 			FieldInfo prevDirectionField = type.GetField("direction" + prevI, BindingFlags.Instance | BindingFlags.Public);
 			FieldInfo prevSortField = type.GetField("direction" + prevI + "Sort", BindingFlags.Instance | BindingFlags.Public);
@@ -254,30 +254,30 @@ namespace Layout3D {
 			FieldInfo nextDeltaField = type.GetField("direction" + nextI + "Delta", BindingFlags.Instance | BindingFlags.Public);
 			FieldInfo nextLimitField = type.GetField("direction" + nextI + "Limit", BindingFlags.Instance | BindingFlags.Public);
 
-			Direction prevDirection = (Direction)prevDirectionField.GetValue(m_gridLayout);
-			SortType prevSort = (SortType)prevSortField.GetValue(m_gridLayout);
-			AlignType prevAlign = (AlignType)prevAlignField.GetValue(m_gridLayout);
-			float prevDelta = (float)prevDeltaField.GetValue(m_gridLayout);
-			uint prevLimit = (uint)prevLimitField.GetValue(m_gridLayout);
+			Direction prevDirection = (Direction)prevDirectionField.GetValue(grid3DLayout);
+			SortType prevSort = (SortType)prevSortField.GetValue(grid3DLayout);
+			AlignType prevAlign = (AlignType)prevAlignField.GetValue(grid3DLayout);
+			float prevDelta = (float)prevDeltaField.GetValue(grid3DLayout);
+			uint prevLimit = (uint)prevLimitField.GetValue(grid3DLayout);
 
-			Direction nextDirection = (Direction)nextDirectionField.GetValue(m_gridLayout);
-			SortType nextSort = (SortType)nextSortField.GetValue(m_gridLayout);
-			AlignType nextAlign = (AlignType)nextAlignField.GetValue(m_gridLayout);
-			float nextDelta = (float)nextDeltaField.GetValue(m_gridLayout);
-			uint nextLimit = nextLimitField == null ? 0 : (uint)nextLimitField.GetValue(m_gridLayout);
+			Direction nextDirection = (Direction)nextDirectionField.GetValue(grid3DLayout);
+			SortType nextSort = (SortType)nextSortField.GetValue(grid3DLayout);
+			AlignType nextAlign = (AlignType)nextAlignField.GetValue(grid3DLayout);
+			float nextDelta = (float)nextDeltaField.GetValue(grid3DLayout);
+			uint nextLimit = nextLimitField == null ? 0 : (uint)nextLimitField.GetValue(grid3DLayout);
 
-			Undo.RecordObject(m_gridLayout, "UpDown");
-			prevDirectionField.SetValue(m_gridLayout, nextDirection);
-			nextDirectionField.SetValue(m_gridLayout, prevDirection);
-			prevSortField.SetValue(m_gridLayout, nextSort);
-			nextSortField.SetValue(m_gridLayout, prevSort);
-			prevAlignField.SetValue(m_gridLayout, nextAlign);
-			nextAlignField.SetValue(m_gridLayout, prevAlign);
-			prevDeltaField.SetValue(m_gridLayout, nextDelta);
-			nextDeltaField.SetValue(m_gridLayout, prevDelta);
+			Undo.RecordObject(grid3DLayout, "UpDown");
+			prevDirectionField.SetValue(grid3DLayout, nextDirection);
+			nextDirectionField.SetValue(grid3DLayout, prevDirection);
+			prevSortField.SetValue(grid3DLayout, nextSort);
+			nextSortField.SetValue(grid3DLayout, prevSort);
+			prevAlignField.SetValue(grid3DLayout, nextAlign);
+			nextAlignField.SetValue(grid3DLayout, prevAlign);
+			prevDeltaField.SetValue(grid3DLayout, nextDelta);
+			nextDeltaField.SetValue(grid3DLayout, prevDelta);
 			if (nextLimit > 0) {
-				prevLimitField.SetValue(m_gridLayout, nextLimit);
-				nextLimitField.SetValue(m_gridLayout, prevLimit);
+				prevLimitField.SetValue(grid3DLayout, nextLimit);
+				nextLimitField?.SetValue(grid3DLayout, prevLimit);
 			}
 			// 交换成功
 			return true;
