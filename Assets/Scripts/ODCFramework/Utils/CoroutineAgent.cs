@@ -14,6 +14,8 @@ public class CoroutineAgent : SingletonComp<CoroutineAgent> {
 }
 
 public static class CoroutineUtil {
+	private static readonly WaitForEndOfFrame WAIT_FOR_END_OF_FRAME = new WaitForEndOfFrame();
+	
 	private static readonly ConditionalWeakTable<Coroutine, IEnumerator> s_coroutineMap = new ConditionalWeakTable<Coroutine, IEnumerator>();
 
 	public static Coroutine StartCo(this MonoBehaviour owner, IEnumerator routine) {
@@ -27,9 +29,10 @@ public static class CoroutineUtil {
 	 * 停止原协程并从当前迭代开启新的协程
 	 */
 	public static Coroutine StartCo(this MonoBehaviour owner, Coroutine coroutine) {
-		if (s_coroutineMap.TryGetValue(coroutine, out var routine)) {
+		if (coroutine != null && s_coroutineMap.TryGetValue(coroutine, out var routine) && routine != null) {
 			if (!owner) owner = CoroutineAgent.Instance;
 			owner.StopCoroutine(routine);
+			s_coroutineMap.Remove(coroutine);
 			var co = owner.StartCoroutine(routine);
 			s_coroutineMap.Add(co, routine);
 			return co;
@@ -38,10 +41,12 @@ public static class CoroutineUtil {
 	}
 	
 	public static void StopCo(this MonoBehaviour owner, IEnumerator routine) {
+		if (routine == null) return;
 		if (!owner) owner = CoroutineAgent.Instance;
 		owner.StopCoroutine(routine);
 	}
 	public static void StopCo(this MonoBehaviour owner, Coroutine coroutine) {
+		if (coroutine == null) return;
 		if (!owner) owner = CoroutineAgent.Instance;
 		owner.StopCoroutine(coroutine);
 	}
@@ -55,7 +60,18 @@ public static class CoroutineUtil {
 		StopCo(owner, routine);
 		return StartCo(owner, routine);
 	}
+	public static Coroutine MoveNext(this MonoBehaviour owner, Coroutine coroutine) {
+		if (coroutine != null && s_coroutineMap.TryGetValue(coroutine, out var routine)) {
+			return MoveNext(owner, routine);
+		}
+		return null;
+	}
 
+	public static void Flush(Coroutine coroutine, int maxSteps = 999) {
+		if (coroutine != null && s_coroutineMap.TryGetValue(coroutine, out var routine)) {
+			Flush(routine, maxSteps);
+		}
+	}
 	public static void Flush(IEnumerator routine, int maxSteps = 999) {
 		if (routine == null) return;
 		
@@ -70,18 +86,12 @@ public static class CoroutineUtil {
 		}
 	}
 
-	public static void Flush(Coroutine coroutine, int maxSteps = 999) {
-		if (s_coroutineMap.TryGetValue(coroutine, out var routine)) {
-			Flush(routine, maxSteps);
-		}
-	}
-
 	public static Coroutine Late(this MonoBehaviour owner, Action callback) {
 		return StartCo(owner, IELate(callback));
 	}
 	private static IEnumerator IELate(Action callback) {
 		if (callback != null) {
-			yield return new WaitForEndOfFrame();
+			yield return WAIT_FOR_END_OF_FRAME;
 			callback.Invoke();
 		}
 	}
@@ -94,10 +104,10 @@ public static class CoroutineUtil {
 	}
 	private static IEnumerator IEOnce(float delay, Action callback, bool late) {
 		if (callback != null) {
-			if (late) {
-				yield return new WaitForEndOfFrame();
-			}
 			yield return new WaitForSeconds(delay);
+			if (late) {
+				yield return WAIT_FOR_END_OF_FRAME;
+			}
 			callback.Invoke();
 		}
 	}
@@ -110,11 +120,11 @@ public static class CoroutineUtil {
 	}
 	private static IEnumerator IEFrameOnce(int delay, Action callback, bool late) {
 		if (callback != null) {
-			if (late) {
-				yield return new WaitForEndOfFrame();
-			}
 			for (int i = 0; i < delay; ++i) {
 				yield return null;
+			}
+			if (late) {
+				yield return WAIT_FOR_END_OF_FRAME;
 			}
 			callback.Invoke();
 		}
@@ -134,10 +144,10 @@ public static class CoroutineUtil {
 	}
 	private static IEnumerator IEWait(object instruction, Action callback, bool late) {
 		if (instruction != null) {
-			if (late) {
-				yield return new WaitForEndOfFrame();
-			}
 			yield return instruction;
+			if (late) {
+				yield return WAIT_FOR_END_OF_FRAME;
+			}
 			callback?.Invoke();
 		}
 	}
@@ -150,12 +160,12 @@ public static class CoroutineUtil {
 	}
 	private static IEnumerator IELoop(float interval, Func<bool> loopUntil, bool late) {
 		if (loopUntil != null) {
-			if (late) {
-				yield return new WaitForEndOfFrame();
-			}
 			var instruction = new WaitForSeconds(interval);
 			while (!loopUntil()) {
 				yield return instruction;
+			}
+			if (late) {
+				yield return WAIT_FOR_END_OF_FRAME;
 			}
 		}
 	}
@@ -168,13 +178,13 @@ public static class CoroutineUtil {
 	}
 	private static IEnumerator IEFrameLoop(float interval, Func<bool> loopUntil, bool late) {
 		if (loopUntil != null) {
-			if (late) {
-				yield return new WaitForEndOfFrame();
-			}
 			while (!loopUntil()) {
 				for (int i = 0; i < interval; ++i) {
 					yield return null;
 				}
+			}
+			if (late) {
+				yield return WAIT_FOR_END_OF_FRAME;
 			}
 		}
 	}
