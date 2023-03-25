@@ -132,10 +132,10 @@ public static class CoroutineUtil {
 	}
 
 	public static Coroutine Wait(this MonoBehaviour owner, [NotNull] Func<bool> loopUntil, Action callback) {
-		return Wait(owner, new WaitUntil(loopUntil), callback);
+		return StartCo(owner, IEWait(loopUntil, callback, false));
 	}
 	public static Coroutine LateWait(this MonoBehaviour owner, [NotNull] Func<bool> loopUntil, Action callback) {
-		return LateWait(owner, new WaitUntil(loopUntil), callback);
+		return StartCo(owner, IEWait(loopUntil, callback, true));
 	}
 	private static IEnumerator IEWait([NotNull] Func<bool> loopUntil, Action callback, bool late) {
 		while (!loopUntil()) {
@@ -171,11 +171,14 @@ public static class CoroutineUtil {
 	private static IEnumerator IELoop(float interval, Func<bool> loopUntil, bool late) {
 		if (loopUntil != null) {
 			var instruction = new WaitForSeconds(interval);
-			while (!loopUntil()) {
-				yield return instruction;
-			}
 			if (late) {
 				yield return WAIT_FOR_END_OF_FRAME;
+			}
+			while (!loopUntil()) {
+				yield return instruction;
+				if (late) {
+					yield return WAIT_FOR_END_OF_FRAME;
+				}
 			}
 		}
 	}
@@ -188,13 +191,19 @@ public static class CoroutineUtil {
 	}
 	private static IEnumerator IEFrameLoop(float interval, Func<bool> loopUntil, bool late) {
 		if (loopUntil != null) {
-			while (!loopUntil()) {
-				for (int i = 0; i < interval; ++i) {
-					yield return null;
-				}
-			}
 			if (late) {
 				yield return WAIT_FOR_END_OF_FRAME;
+				while (!loopUntil()) {
+					for (int i = 0; i < interval; ++i) {
+						yield return WAIT_FOR_END_OF_FRAME;
+					}
+				}
+			} else {
+				while (!loopUntil()) {
+					for (int i = 0; i < interval; ++i) {
+						yield return null;
+					}
+				}
 			}
 		}
 	}
