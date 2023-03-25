@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class CoroutineAgent : SingletonComp<CoroutineAgent> {
@@ -130,11 +131,20 @@ public static class CoroutineUtil {
 		}
 	}
 
-	public static Coroutine Wait(this MonoBehaviour owner, Func<bool> loopUntil, Action callback) {
+	public static Coroutine Wait(this MonoBehaviour owner, [NotNull] Func<bool> loopUntil, Action callback) {
 		return Wait(owner, new WaitUntil(loopUntil), callback);
 	}
-	public static Coroutine LateWait(this MonoBehaviour owner, Func<bool> loopUntil, Action callback) {
+	public static Coroutine LateWait(this MonoBehaviour owner, [NotNull] Func<bool> loopUntil, Action callback) {
 		return LateWait(owner, new WaitUntil(loopUntil), callback);
+	}
+	private static IEnumerator IEWait([NotNull] Func<bool> loopUntil, Action callback, bool late) {
+		while (!loopUntil()) {
+			yield return null;
+		}
+		if (late) {
+			yield return WAIT_FOR_END_OF_FRAME;
+		}
+		callback?.Invoke();
 	}
 	public static Coroutine Wait(this MonoBehaviour owner, object instruction, Action callback) {
 		return StartCo(owner, IEWait(instruction, callback, false));
@@ -143,7 +153,7 @@ public static class CoroutineUtil {
 		return StartCo(owner, IEWait(instruction, callback, true));
 	}
 	private static IEnumerator IEWait(object instruction, Action callback, bool late) {
-		if (instruction != null) {
+		if (instruction != null || callback != null) {
 			yield return instruction;
 			if (late) {
 				yield return WAIT_FOR_END_OF_FRAME;
